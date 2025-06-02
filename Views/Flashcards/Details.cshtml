@@ -1,0 +1,64 @@
+@model FlashcardApp.Models.Flashcard
+
+@{
+    ViewData["Title"] = "Flashcard Detayları";
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5><i class="bi bi-info-circle"></i> Flashcard Detayları</h5>
+        <span class="category-badge">@(Model.Category ?? "Kategori yok")</span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Ön Yüz</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">@Model.FrontSide</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Arka Yüz</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">@Model.BackSide</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Oluşturulma Tarihi:</dt>
+                    <dd class="col-sm-8">@Model.CreatedDate.ToString("f")</dd>
+                    
+                    <dt class="col-sm-4">Son Çalışma:</dt>
+                    <dd class="col-sm-8">
+                        @(Model.LastReviewedDate?.ToString("f") ?? "Henüz çalışılmadı")
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Listeye Dön
+            </a>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
+                    <i class="bi bi-pencil"></i> Düzenle
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Sil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+﻿@model FlashcardApp.Models.Flashcard
+
+@{
+    ViewData["Title"] = "Çalışma Modu";
+}
+
+<div class="text-center mb-4">
+    <h1><i class="bi bi-lightbulb"></i> Çalışma Modu</h1>
+    <p class="lead">Flashcard'larınızı burada test edebilirsiniz</p>
+</div>
+
+<div class="flashcard-container">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-front card">
+            <div class="card-body text-center p-5">
+                <span class="category-badge mb-3">@(Model.Category ?? "Genel")</span>
+                <h3 class="card-title">@Model.FrontSide</h3>
+                <p class="text-muted mt-4">Cevabı görmek için kartı tıklayın</p>
+            </div>
+        </div>
+        <div class="flashcard-back card">
+            <div class="card-body text-center p-5">
+                <span class="category-badge mb-3">@(Model.Category ?? "Genel")</span>
+                <h3 class="card-title">@Model.BackSide</h3>
+                <div class="mt-4">
+                    <form asp-action="Review" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-arrow-right-circle"></i> Sonraki Kart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-x-circle"></i> Çalışmayı Bitir
+    </a>
+</div>
+
+@section Scripts {
+    <script>
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+        }
+        
+        // Sayfa yüklendiğinde kartı otomatik çevirme (opsiyonel)
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                flipCard();
+                setTimeout(flipCard, 2000);
+            }, 1000);
+        });
+    </script>
+}

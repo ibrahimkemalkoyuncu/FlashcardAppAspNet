@@ -1,0 +1,57 @@
+@model FlashcardApp.Models.Flashcard
+
+@{
+    // Model null ise yeni bir örnek oluşturuyoruz
+    var flashcard = Model ?? new Flashcard();
+    ViewData["Title"] = flashcard.Id == 0 ? "Yeni Flashcard Ekle" : "Flashcard Düzenle";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-journal-plus"></i> @ViewData["Title"]</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="@(flashcard.Id == 0 ? "Create" : "Edit")">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            @if (flashcard.Id != 0)
+            {
+                <input type="hidden" asp-for="Id" />
+            }
+            
+            <div class="mb-3">
+                <label asp-for="FrontSide" class="form-label"></label>
+                <textarea asp-for="FrontSide" class="form-control" rows="3" 
+                          placeholder="Flashcard'ın ön yüzünü yazın"></textarea>
+                <span asp-validation-for="FrontSide" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="BackSide" class="form-label"></label>
+                <textarea asp-for="BackSide" class="form-control" rows="3" 
+                          placeholder="Flashcard'ın arka yüzünü yazın"></textarea>
+                <span asp-validation-for="BackSide" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-4">
+                <label asp-for="Category" class="form-label"></label>
+                <input asp-for="Category" class="form-control" 
+                       placeholder="Kategori belirtin (isteğe bağlı)">
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Listeye Dön
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> @(flashcard.Id == 0 ? "Oluştur" : "Güncelle")
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

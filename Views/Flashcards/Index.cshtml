@@ -1,0 +1,103 @@
+@model IEnumerable<FlashcardApp.Models.Flashcard>
+
+@{
+    ViewData["Title"] = "Flashcard Listesi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-journal-text"></i> Flashcard Listesi</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Yeni Kart Ekle
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-search"></i> Filtreleme</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="searchString" class="form-label">Arama:</label>
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" 
+                       class="form-control" placeholder="Kart içeriğinde ara...">
+            </div>
+            <div class="col-md-4">
+                <label for="categoryFilter" class="form-label">Kategori:</label>
+                <select name="categoryFilter" class="form-select" asp-items="@(new SelectList(ViewBag.Categories))">
+                    <option value="">Tüm Kategoriler</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-funnel"></i> Filtrele
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-ul"></i> Kartlar</h5>
+        <span class="badge bg-primary">@Model.Count() kart</span>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ön Yüz</th>
+                            <th>Arka Yüz</th>
+                            <th>Kategori</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FrontSide</td>
+                                <td>@item.BackSide</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Category))
+                                    {
+                                        <span class="category-badge">@item.Category</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Kategori yok</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle-fill"></i> Henüz hiç flashcard eklenmemiş.
+            </div>
+        }
+    </div>
+</div>
