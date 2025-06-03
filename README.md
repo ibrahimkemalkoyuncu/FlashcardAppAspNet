@@ -39,3 +39,58 @@ Flashcard App, kullanıcıların öğrenme süreçlerini kolaylaştırmak için 
    ```bash
    git clone https://github.com/kullaniciadiniz/flashcard-app.git
    cd flashcard-app
+
+2. Gerekli paketleri yükleyin:
+   dotnet restore
+
+3. Veritabanını oluşturun:
+   dotnet ef database update
+
+4. Uygulamayı çalıştırın:
+   dotnet run
+
+5. Tarayıcınızda açın:
+   https://localhost:5001
+
+
+Veritabanı Şeması
+
+erDiagram
+    FLASHCARD ||--o{ CATEGORY : belongs_to
+    FLASHCARD {
+        int Id PK
+        string FrontSide
+        string BackSide
+        string Category
+        datetime CreatedDate
+        datetime LastReviewedDate
+    }
+
+
+Kullanım Kılavuzu
+
+   Yeni Kart Ekleme:
+
+      Navigasyon menüsünden "Yeni Kart" seçeneğine tıklayın
+
+      Ön yüz ve arka yüz bilgilerini girin
+
+      İsteğe bağlı olarak kategori belirleyin
+
+      "Oluştur" butonuna basın
+
+   Çalışma Modu:
+
+      Navigasyondan "Çalışma Modu"nu seçin
+
+      Kartları tıklayarak çevirebilirsiniz
+
+      "Sonraki Kart" butonu ile rastgele yeni kart getirebilirsiniz
+
+   Filtreleme:
+
+      Ana sayfada arama kutusuna metin girebilirsiniz
+
+      Kategori dropdown'ı ile filtreleme yapabilirsiniz
+
+   
