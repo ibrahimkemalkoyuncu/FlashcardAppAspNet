@@ -1,35 +1,54 @@
-using Microsoft.EntityFrameworkCore;
 using FlashcardApp.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardApp.Data
 {
-    // Entity Framework Core DbContext sınıfımız
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        // Constructor: DbContextOptions alır ve base sınıfa iletir
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options) { }
 
-        // Flashcards tablosunu temsil eden DbSet
         public DbSet<Flashcard> Flashcards { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
-        // Model oluşturulurken ek konfigürasyonlar yapabilmek için
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
-            // Flashcard entity için ek konfigürasyonlar
+
+            // Flashcard konfigürasyonu
             modelBuilder.Entity<Flashcard>(entity =>
             {
-                // FrontSide için maksimum uzunluk
-                entity.Property(e => e.FrontSide).HasMaxLength(500);
-                
-                // BackSide için maksimum uzunluk
-                entity.Property(e => e.BackSide).HasMaxLength(500);
-                
-                // Category için maksimum uzunluk
-                entity.Property(e => e.Category).HasMaxLength(100);
+                entity.Property(f => f.FrontSide).HasMaxLength(500).IsRequired();
+                entity.Property(f => f.BackSide).HasMaxLength(500).IsRequired();
+                entity.Property(f => f.Category).HasMaxLength(100);
+                entity.Property(f => f.CreatedDate).HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(f => f.User)
+                      .WithMany(u => u.Flashcards)
+                      .HasForeignKey(f => f.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(f => f.CategoryObj)
+                      .WithMany(c => c.Flashcards)
+                      .HasForeignKey(f => f.CategoryId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Category konfigürasyonu
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
+                entity.Property(c => c.Description).HasMaxLength(500);
+                entity.HasIndex(c => c.Name).IsUnique();
+            });
+
+            // ApplicationUser konfigürasyonu
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                entity.Property(u => u.FirstName).HasMaxLength(100);
+                entity.Property(u => u.LastName).HasMaxLength(100);
+                entity.Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
             });
         }
     }

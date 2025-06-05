@@ -4,9 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FlashcardApp</title>
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
     <style>
         :root {
             --primary-color: #4e73df;
@@ -24,139 +31,201 @@
         .navbar {
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
             background: white;
+            padding: 0.75rem 1rem;
         }
         
         .navbar-brand {
             font-weight: 800;
             font-size: 1.5rem;
             color: var(--primary-color) !important;
+            display: flex;
+            align-items: center;
         }
         
-        .card {
-            border: none;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            margin-bottom: 1.5rem;
+        .navbar-brand i {
+            margin-right: 0.5rem;
         }
         
-        .card-header {
-            background-color: var(--primary-color);
-            color: white;
+        .nav-link {
             font-weight: 600;
-            border-radius: 0.35rem 0.35rem 0 0 !important;
+            color: #5a5c69 !important;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
         }
         
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+        .nav-link i {
+            margin-right: 0.3rem;
         }
         
-        .btn-primary:hover {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
+        .nav-link:hover {
+            color: var(--primary-color) !important;
         }
         
-        .flashcard-container {
-            perspective: 1000px;
-            margin: 20px auto;
-            max-width: 600px;
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
         
-        .flashcard {
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            position: relative;
-            min-height: 300px;
+        .dropdown-item {
+            font-weight: 500;
+        }
+        
+        .user-greeting {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #5a5c69 !important;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
             cursor: pointer;
         }
         
-        .flashcard.flipped {
-            transform: rotateY(180deg);
+        .logout-btn:hover {
+            color: var(--primary-color) !important;
         }
         
-        .flashcard-front, .flashcard-back {
-            backface-visibility: hidden;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .main-container {
+            min-height: calc(100vh - 120px);
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        footer {
+            background-color: white;
+            box-shadow: 0 -0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            background: white;
         }
         
-        .flashcard-back {
-            transform: rotateY(180deg);
-            background: #f8f9fa;
+        .footer-links a {
+            margin-left: 1rem;
+            color: var(--text-color);
+            text-decoration: none;
         }
         
-        .category-badge {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .footer-links a:hover {
+            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light sticky-top mb-4">
+        <nav class="navbar navbar-expand-lg navbar-light sticky-top">
             <div class="container">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-journal-bookmark-fill"></i> FlashcardApp
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house-door"></i> Anasayfa
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Flashcards" asp-action="Index">
-                                <i class="bi bi-journal-text"></i> Tüm Kartlar
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Flashcards" asp-action="Review">
-                                <i class="bi bi-lightbulb"></i> Çalışma Modu
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Flashcards" asp-action="Create">
-                                <i class="bi bi-plus-circle"></i> Yeni Kart
-                            </a>
-                        </li>
+                        
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Flashcards" asp-action="Index">
+                                    <i class="bi bi-journal-text"></i> Flashcard'larım
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Flashcards" asp-action="Review">
+                                    <i class="bi bi-lightbulb"></i> Çalışma Modu
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span class="user-greeting">Merhaba, @User.Identity.Name!</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                            <i class="bi bi-person"></i> Profilim
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">
+                                    <i class="bi bi-person-plus"></i> Kayıt Ol
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-5">
+    <div class="container main-container">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="footer py-3 mt-5 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">&copy; 2023 FlashcardApp - Tüm hakları saklıdır</span>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="copyright">
+                    &copy; @DateTime.Now.Year - FlashcardApp - Tüm hakları saklıdır
+                </div>
+                <div class="footer-links">
+                    <a asp-controller="Home" asp-action="Privacy">Gizlilik Politikası</a>
+                    <a asp-controller="Home" asp-action="About">Hakkında</a>
+                    <a asp-controller="Home" asp-action="Contact">İletişim</a>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Site JS -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
