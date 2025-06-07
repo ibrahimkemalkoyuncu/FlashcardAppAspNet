@@ -313,41 +313,48 @@ namespace FlashcardApp.Controllers
             }
 
             var flashcardsQuery = _context.Flashcards
-                .Include(f => f.CategoryObj)
+                .Include(f => f.Category)
                 .Where(f => f.UserId == currentUser.Id)
                 .AsQueryable();
 
-            // Arama filtresi
+            // Arama filtresi - DÜZELTİLDİ
             if (!string.IsNullOrEmpty(searchString))
             {
                 flashcardsQuery = flashcardsQuery.Where(f =>
                     (f.FrontSide != null && f.FrontSide.Contains(searchString)) ||
                     (f.BackSide != null && f.BackSide.Contains(searchString)) ||
-                    (f.Category != null && f.Category.Contains(searchString)) ||
-                    (f.CategoryObj != null && f.CategoryObj.Name != null &&
-                     f.CategoryObj.Name.Contains(searchString)));
+                    (f.Category != null && f.Category.Name != null &&
+                     f.Category.Name.Contains(searchString)));
             }
 
-            // Kategori filtresi
+            // Kategori filtresi - DÜZELTİLDİ
             if (!string.IsNullOrEmpty(categoryFilter))
             {
                 flashcardsQuery = flashcardsQuery.Where(f =>
-                    (f.Category != null && f.Category == categoryFilter) ||
-                    (f.CategoryObj != null && f.CategoryObj.Name == categoryFilter));
+                    f.Category != null && f.Category.Name == categoryFilter);
             }
 
-            // Kategorileri dropdown için hazırla
+            //Kategorileri dropdown için hazırla -DÜZELTİLDİ
+
+            var denemeler = await _context.Categories.ToListAsync();
+
             var categories = await _context.Categories
-                .Where(c => c.Name != null)
-                .Select(c => c.Name!)
-                .Union(_context.Flashcards
-                    .Where(f => f.Category != null)
-                    .Select(f => f.Category!))
+                .Where(c => c.UserId == currentUser.Id && c.Name != null)
+                .Select(c => c.Name)
                 .Distinct()
                 .OrderBy(c => c)
                 .ToListAsync();
 
             ViewBag.Categories = new SelectList(categories);
+
+
+            var categories1 = await _context.Categories
+                .Where(c => c.UserId == currentUser.Id)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+
 
             var flashcards = await flashcardsQuery
                 .OrderByDescending(f => f.CreatedDate)
@@ -371,7 +378,7 @@ namespace FlashcardApp.Controllers
             }
 
             var flashcard = await _context.Flashcards
-                .Include(f => f.CategoryObj)
+                .Include(f => f.Category)
                 .FirstOrDefaultAsync(f => f.Id == id && f.UserId == currentUser.Id);
 
             if (flashcard == null)
@@ -493,7 +500,7 @@ namespace FlashcardApp.Controllers
             }
 
             var flashcard = await _context.Flashcards
-                .Include(f => f.CategoryObj)
+                .Include(f => f.Category)
                 .FirstOrDefaultAsync(f => f.Id == id && f.UserId == currentUser.Id);
 
             if (flashcard == null)
@@ -527,27 +534,36 @@ namespace FlashcardApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private async Task<ApplicationUser?> GetCurrentUserAsync()
+        {
+            return await _userManager.GetUserAsync(User);
+        }
+
         // GET: Flashcards/Review
         public async Task<IActionResult> Review()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
-            {
-                return Challenge();
-            }
+            if (currentUser == null) return Challenge();
 
             var flashcards = await _context.Flashcards
+                .Include(f => f.Category) // Category'yi include etmeyi unutmayın
                 .Where(f => f.UserId == currentUser.Id)
                 .ToListAsync();
 
             if (!flashcards.Any())
             {
-                TempData["Message"] = "Çalışabileceğiniz hiç flashcard yok. Önce bir flashcard oluşturun.";
+                TempData["ErrorMessage"] = "Çalışabileceğiniz flashcard bulunamadı";
                 return RedirectToAction(nameof(Index));
             }
 
             var random = new Random();
             var flashcard = flashcards[random.Next(flashcards.Count)];
+
+            // Flashcard null kontrolü
+            if (flashcard == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(flashcard);
         }

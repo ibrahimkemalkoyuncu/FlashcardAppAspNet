@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5><i class="bi bi-info-circle"></i> Flashcard Detayları</h5>
-        <span class="category-badge">@(Model.Category ?? "Kategori yok")</span>
+        <span class="category-badge">@(Model.Category?.Name ?? "Kategori yok")</span>
     </div>
     <div class="card-body">
         <div class="row">

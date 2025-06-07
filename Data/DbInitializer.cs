@@ -1,34 +1,96 @@
 ﻿using FlashcardApp.Models;
+using FlashcardApp.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardApp.Data
 {
-    // Veritabanı başlangıç verilerini oluşturmak için static sınıf
     public static class DbInitializer
     {
-        // Veritabanını başlatma ve seed verileri ekleme metodu
-        public static void Initialize(ApplicationDbContext context)
+        public static async Task InitializeAsync(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            bool isDevelopment)
         {
-            // Veritabanını migrate et (gerekirse oluşturur)
-            context.Database.Migrate();
+            // Veritabanını otomatik migrate et
+            await context.Database.MigrateAsync();
 
-            // 5. ADIM: Tüm mevcut verileri sil (sadece development ortamında)
-            if (context.Database.IsSqlServer() && context.Database.CanConnect())
+            // Development ortamında seed verileri ekle
+            if (isDevelopment)
             {
-                context.Flashcards.RemoveRange(context.Flashcards);
-                context.SaveChanges();
+                await SeedRolesAsync(roleManager);
+                await SeedAdminUserAsync(userManager);
+                await SeedFlashcardsAsync(context);
+            }
+        }
+
+        private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+        {
+            string[] roleNames = { "Admin", "User" };
+
+            foreach (var roleName in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+        }
+
+        private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+        {
+            var adminUser = new ApplicationUser
+            {
+                UserName = "admin@flashcardapp.com",
+                Email = "admin@flashcardapp.com",
+                EmailConfirmed = true
+            };
+
+            var user = await userManager.FindByEmailAsync(adminUser.Email);
+            if (user == null)
+            {
+                var createResult = await userManager.CreateAsync(adminUser, "Admin123!");
+                if (createResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+        }
+
+        private static async Task SeedFlashcardsAsync(ApplicationDbContext context)
+        {
+            // Kategorileri önce oluştur
+            if (!await context.Categories.AnyAsync())
+            {
+                var categories = new List<Category>
+                {
+                    new Category { Name = "Teknoloji" },
+                    new Category { Name = "Programlama" },
+                    new Category { Name = "Tarih" },
+                    new Category { Name = "Fizik" }
+                };
+
+                await context.Categories.AddRangeAsync(categories);
+                await context.SaveChangesAsync();
             }
 
-            // Eğer veritabanında hiç flashcard yoksa seed verileri ekle
-            if (!context.Flashcards.Any())
+            // Flashcard'ları ekle (kategorilerle ilişkilendirerek)
+            if (!await context.Flashcards.AnyAsync())
             {
-                var flashcards = new Flashcard[]
+                var techCategory = await context.Categories.FirstAsync(c => c.Name == "Teknoloji");
+                var programmingCategory = await context.Categories.FirstAsync(c => c.Name == "Programlama");
+                var historyCategory = await context.Categories.FirstAsync(c => c.Name == "Tarih");
+                var physicsCategory = await context.Categories.FirstAsync(c => c.Name == "Fizik");
+
+                var flashcards = new List<Flashcard>
                 {
                     new Flashcard
                     {
                         FrontSide = "ASP.NET Core nedir?",
                         BackSide = "Microsoft tarafından geliştirilen, açık kaynaklı ve platformlar arası bir web framework'üdür.",
-                        Category = "Teknoloji",
+                        CategoryId = techCategory.Id,
                         CreatedDate = DateTime.Now.AddDays(-10),
                         LastReviewedDate = DateTime.Now.AddDays(-5)
                     },
@@ -36,7 +98,7 @@ namespace FlashcardApp.Data
                     {
                         FrontSide = "Entity Framework Core nedir?",
                         BackSide = "Microsoft'un .NET uygulamaları için geliştirdiği bir ORM (Object-Relational Mapping) aracıdır.",
-                        Category = "Teknoloji",
+                        CategoryId = techCategory.Id,
                         CreatedDate = DateTime.Now.AddDays(-8),
                         LastReviewedDate = DateTime.Now.AddDays(-3)
                     },
@@ -44,7 +106,7 @@ namespace FlashcardApp.Data
                     {
                         FrontSide = "SOLID prensipleri nelerdir?",
                         BackSide = "1. Single Responsibility\n2. Open-Closed\n3. Liskov Substitution\n4. Interface Segregation\n5. Dependency Inversion",
-                        Category = "Programlama",
+                        CategoryId = programmingCategory.Id,
                         CreatedDate = DateTime.Now.AddDays(-15),
                         LastReviewedDate = DateTime.Now.AddDays(-7)
                     },
@@ -52,7 +114,7 @@ namespace FlashcardApp.Data
                     {
                         FrontSide = "İstanbul'un fethi ne zaman oldu?",
                         BackSide = "29 Mayıs 1453",
-                        Category = "Tarih",
+                        CategoryId = historyCategory.Id,
                         CreatedDate = DateTime.Now.AddDays(-20),
                         LastReviewedDate = DateTime.Now.AddDays(-2)
                     },
@@ -60,13 +122,13 @@ namespace FlashcardApp.Data
                     {
                         FrontSide = "Newton'un hareket yasaları kaç tanedir?",
                         BackSide = "3 temel hareket yasası vardır.",
-                        Category = "Fizik",
+                        CategoryId = physicsCategory.Id,
                         CreatedDate = DateTime.Now.AddDays(-12)
                     }
                 };
 
-                context.Flashcards.AddRange(flashcards);
-                context.SaveChanges();
+                await context.Flashcards.AddRangeAsync(flashcards);
+                await context.SaveChangesAsync();
             }
         }
     }

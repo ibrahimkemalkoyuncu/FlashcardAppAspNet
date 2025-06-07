@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FlashcardAppAspNet.Data.Migrations
+namespace FlashcardAppAspNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250605220410_ModelGuncelleme1")]
-    partial class ModelGuncelleme1
+    [Migration("20250606233253_FixedCategoryRelations2")]
+    partial class FixedCategoryRelations2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,7 +37,7 @@ namespace FlashcardAppAspNet.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
@@ -50,12 +50,10 @@ namespace FlashcardAppAspNet.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -81,6 +79,10 @@ namespace FlashcardAppAspNet.Data.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePicture")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -123,9 +125,15 @@ namespace FlashcardAppAspNet.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
                         .IsUnique();
 
                     b.ToTable("Categories");
@@ -144,18 +152,16 @@ namespace FlashcardAppAspNet.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DifficultyLevel")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
 
                     b.Property<string>("FrontSide")
                         .IsRequired()
@@ -311,12 +317,22 @@ namespace FlashcardAppAspNet.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("FlashcardApp.Models.Category", b =>
+                {
+                    b.HasOne("FlashcardApp.Models.ApplicationUser", "User")
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FlashcardApp.Models.Flashcard", b =>
                 {
-                    b.HasOne("FlashcardApp.Models.Category", "CategoryObj")
+                    b.HasOne("FlashcardApp.Models.Category", "Category")
                         .WithMany("Flashcards")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("FlashcardApp.Models.ApplicationUser", "User")
                         .WithMany("Flashcards")
@@ -324,7 +340,7 @@ namespace FlashcardAppAspNet.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CategoryObj");
+                    b.Navigation("Category");
 
                     b.Navigation("User");
                 });
@@ -382,6 +398,8 @@ namespace FlashcardAppAspNet.Data.Migrations
 
             modelBuilder.Entity("FlashcardApp.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Flashcards");
                 });
 

@@ -65,7 +65,7 @@
                                 <td>@item.FrontSide</td>
                                 <td>@item.BackSide</td>
                                 <td>
-                                    @if (!string.IsNullOrEmpty(item.Category))
+                                    @if (!string.IsNullOrEmpty(item.Category.Name))
                                     {
                                         <span class="category-badge">@item.Category</span>
                                     }

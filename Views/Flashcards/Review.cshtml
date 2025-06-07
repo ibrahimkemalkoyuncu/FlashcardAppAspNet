@@ -2,6 +2,15 @@
 
 @{
     ViewData["Title"] = "Çalışma Modu";
+
+    // Model null kontrolü ekliyoruz
+    if (Model == null)
+    {
+        <div class="alert alert-danger">
+            Flashcard bulunamadı. Lütfen <a asp-action="Index">ana sayfaya</a> dönün.
+        </div>
+        return;
+    }
 }
 
 <div class="text-center mb-4">
@@ -13,14 +22,18 @@
     <div class="flashcard" id="flashcard" onclick="flipCard()">
         <div class="flashcard-front card">
             <div class="card-body text-center p-5">
-                <span class="category-badge mb-3">@(Model.Category ?? "Genel")</span>
+                <span class="category-badge mb-3">
+                    @(Model.Category?.Name ?? "Genel") <!-- Null conditional operator ekledik -->
+                </span>
                 <h3 class="card-title">@Model.FrontSide</h3>
                 <p class="text-muted mt-4">Cevabı görmek için kartı tıklayın</p>
             </div>
         </div>
         <div class="flashcard-back card">
             <div class="card-body text-center p-5">
-                <span class="category-badge mb-3">@(Model.Category ?? "Genel")</span>
+                <span class="category-badge mb-3">
+                    @(Model.Category?.Name ?? "Genel") <!-- Null conditional operator ekledik -->
+                </span>
                 <h3 class="card-title">@Model.BackSide</h3>
                 <div class="mt-4">
                     <form asp-action="Review" method="post">
@@ -47,7 +60,7 @@
             const flashcard = document.getElementById('flashcard');
             flashcard.classList.toggle('flipped');
         }
-        
+
         // Sayfa yüklendiğinde kartı otomatik çevirme (opsiyonel)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
